@@ -160,6 +160,7 @@ export const TX_TYPE_MAP: TTX_TYPE_MAP = Object.create(null);
 
 export const TRANSFER = generate<ITRANSFER_PROPS>([
     constants.TRANSACTION_TYPE_NUMBER.TRANSFER,
+    1,
     new Base58('senderPublicKey'),
     new Int('timestamp', 8),
     new Int('amount', 8),

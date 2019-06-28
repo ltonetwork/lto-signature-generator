@@ -7,11 +7,14 @@ import * as blake from '../../libs/blake2b';
 import converters from '../../libs/converters';
 import secureRandom from '../libs/secure-random';
 import * as nacl from 'tweetnacl';
+import { derivePath } from 'ed25519-hd-key';
+import * as bip39 from 'bip39';
 
 import { concatUint8Arrays } from './concat';
 import { config } from '../';
-import { ADDRESS_VERSION, INITIAL_NONCE, PRIVATE_KEY_LENGTH, PUBLIC_KEY_LENGTH } from '../constants';
+import { ADDRESS_VERSION, INITIAL_NONCE, PRIVATE_KEY_LENGTH, PUBLIC_KEY_LENGTH, HDPATH } from '../constants';
 import { IKeyPairBytes } from '../interface';
+
 
 function SHA256(input: Array<number> | Uint8Array | string): Uint8Array {
     return Uint8Array.from(sha256.digest(input));
@@ -33,12 +36,25 @@ function buildSeedHash(seedBytes: Uint8Array): Uint8Array {
 }
 
 function strengthenPassword(password: string, rounds: number = 5000): string {
-    while (rounds--) password = converters.byteArrayToHexString(sha256(password));
+    while (rounds--) password = converters.byteArrayToHexString(SHA256(password));
     return password;
 }
 
+function bufferToUint8Array(buf: Buffer): Uint8Array {
+    var a = new Uint8Array(buf.length);
+    for (var i = 0; i < buf.length; i++) a[i] = buf[i];
+    return a;
+}
 
 export default {
+
+    hashChain(data: Uint8Array): Uint8Array {
+        return hashChain(data);
+    },
+
+    buildSeedHash(seedBytes: Uint8Array): Uint8Array {
+      return buildSeedHash(seedBytes);
+    },
 
     buildTransactionSignature(dataBytes: Uint8Array, privateKey: string): string {
 
@@ -97,14 +113,21 @@ export default {
 
     },
 
-    buildKeyPair(seed: string): IKeyPairBytes {
+    buildKeyPair(seed: string, derive: boolean, index: number = 0): IKeyPairBytes {
 
         if (!seed || typeof seed !== 'string') {
             throw new Error('Missing or invalid seed phrase');
         }
 
         const seedBytes = Uint8Array.from(converters.stringToByteArray(seed));
-        const seedHash = buildSeedHash(seedBytes);
+        let seedHash = buildSeedHash(seedBytes);
+        if (derive) {
+            const mnemonicSeedBytes = bip39.mnemonicToSeedSync(seed, '');
+            if (derive) {
+                const { key } = derivePath(`${HDPATH}${index}'`, converters.byteArrayToHexString(bufferToUint8Array(mnemonicSeedBytes)));
+                seedHash = key;
+            }
+        }
         const keys = nacl.sign.keyPair.fromSeed(seedHash);
         return {
             privateKey: keys.secretKey,
@@ -196,7 +219,7 @@ export default {
         const result = new Uint32Array(length);
 
         for (let i = 0; i < length; i++) {
-            const hash = converters.byteArrayToHexString(sha256(`${a[i]}${b[i]}`));
+            const hash = converters.byteArrayToHexString(SHA256(`${a[i]}${b[i]}`));
             const randomValue = parseInt(hash.slice(0, 13), 16);
             result.set([randomValue], i);
         }

@@ -3,7 +3,7 @@ import BigNumber from '../../src/libs/bignumber';
 
 
 export default {
-    [TRANSACTION_TYPE_NUMBER.TRANSFER]: {
+    [TRANSACTION_TYPE_NUMBER.TRANSFER ]: {
         type: TRANSACTION_TYPE_NUMBER.TRANSFER,
         version: TRANSACTION_TYPE_VERSION.TRANSFER,
         senderPublicKey: '2M25DqL2W4rGFLCFadgATboS8EPqyWAN3DjH12AH5Kdr',

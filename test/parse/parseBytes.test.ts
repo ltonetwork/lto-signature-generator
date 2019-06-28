@@ -1,4 +1,5 @@
 import {
+    TRANSFER,
     LEASE_V2,
     CANCEL_LEASING_V2,
     MASS_TRANSFER,
@@ -8,7 +9,7 @@ import {
     MAINNET_BYTE,
     TRANSACTION_TYPE_NUMBER,
     TRANSACTION_TYPE_VERSION,
-    TX_NUMBER_MAP, parseDataTx, TRANSFER_V2, parseAnchorTx
+    TX_NUMBER_MAP, parseDataTx, TRANSFER_V2, parseAnchorTx,
 } from '../../src';
 import TRANSACTIONS_DATA from './transactionsData';
 import BigNumber from '../../src/libs/bignumber';
@@ -25,6 +26,57 @@ import {
 describe('parse', () => {
 
     it('transfer', done => {
+
+        const data = {
+            type: TRANSACTION_TYPE_NUMBER.TRANSFER,
+            version: 1,
+            senderPublicKey: '2M25DqL2W4rGFLCFadgATboS8EPqyWAN3DjH12AH5Kdr',
+            timestamp: new BigNumber(1538663245955),
+            amount: new BigNumber('1000000'),
+            fee: new BigNumber('100000'),
+            recipient: '3PCAB4sHXgvtu5NPoen6EXR5yaNbvsEA8Fj',
+            attachment: 'some text'
+        };
+
+        // @ts-ignore
+        new TRANSFER(data).getBytes().then(bytes => {
+            expect(parseTransferTx(bytes)).toEqual(data);
+            done();
+        }).catch(done);
+    });
+
+    it('transfer v2 extra', done => {
+
+        // const data = {
+        //     type: TRANSACTION_TYPE_NUMBER.TRANSFER,
+        //     version: 2,
+        //     senderPublicKey: '9c4PB1eQMAz5PYcE7D5o3NQESCZaQ1ieMj2SLTfYxrnY',
+        //     timestamp: new BigNumber(1),
+        //     amount: new BigNumber('1'),
+        //     fee: new BigNumber('1'),
+        //     recipient: '3JfLsayRvWbJhZMuP6bmG447DqtHgGWnkuH',
+        //     attachment: ''
+        // };
+
+        const data = {
+            type: TRANSACTION_TYPE_NUMBER.TRANSFER,
+            version: 2,
+            senderPublicKey: '9c4PB1eQMAz5PYcE7D5o3NQESCZaQ1ieMj2SLTfYxrnY',
+            timestamp: new BigNumber(1526641218066),
+            amount: new BigNumber('100000000'),
+            fee: new BigNumber('100000000'),
+            recipient: '3JfLsayRvWbJhZMuP6bmG447DqtHgGWnkuH',
+            attachment: 'falafel'
+        };
+
+        // @ts-ignore
+        new TRANSFER_V2(data).getBytes().then(bytes => {
+            expect(parseTransferTx(bytes)).toEqual(data);
+            done();
+        }).catch(done);
+    });
+
+    it('transfer v2', done => {
 
         const data = TRANSACTIONS_DATA[TRANSACTION_TYPE_NUMBER.TRANSFER];
 

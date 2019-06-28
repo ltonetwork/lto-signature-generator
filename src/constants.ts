@@ -55,3 +55,5 @@ export const PUBLIC_KEY_LENGTH: number = 32;
 
 // That is to mark ByteProcessor instances which cannot be affected by user
 export const STUB_NAME = 'reservedName';
+
+export const HDPATH = `m/44'/353'/0'/0'/`;

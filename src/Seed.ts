@@ -10,12 +10,12 @@ export class Seed {
     public readonly address: string;
     public readonly keyPair: IKeyPair;
 
-    constructor(phrase: string) {
+    constructor(phrase: string, bip39: boolean = false, index: number = 0) {
         if (phrase.length < config.get('minimalSeedLength')) {
             throw new Error('Your seed length is less than allowed in config');
         }
 
-        const keys = utils.crypto.buildKeyPair(phrase);
+        const keys = utils.crypto.buildKeyPair(phrase, bip39, index);
 
         this.phrase = phrase;
         this.address = utils.crypto.buildRawAddress(keys.publicKey);
@@ -80,7 +80,7 @@ export class Seed {
         return new Seed(phrase);
     }
 
-    public static fromExistingPhrase(phrase: string): Seed {
+    public static fromExistingPhrase(phrase: string, derive: boolean = false, index: number = 0): Seed {
         const minimumSeedLength = config.get('minimalSeedLength');
 
         if (phrase.length < minimumSeedLength) {
@@ -88,7 +88,7 @@ export class Seed {
             throw new Error(`The resulted seed length is less than the minimum length (${minimumSeedLength})`);
         }
 
-        return new Seed(phrase);
+        return new Seed(phrase, derive, index);
     }
 
     private static _generateNewSeed(length: number): string {
